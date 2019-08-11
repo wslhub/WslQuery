@@ -6,7 +6,7 @@
 
 This program is a utility that reads the internal information of Windows Subsystem for Linux from the system and outputs the data to a standard output device in JSON format.
 
-As of 2019, Microsoft has not released any publicly available WSL SDKs or interfaces. As a result, the project is based entirely on the code of Biswa96's WslReverse repository and is accordingly licensed under the GPL v3. If the full SDK code is released later, the license may change.
+As of 2019, Microsoft has not released any publicly available LXSS related SDKs or interfaces. As a result, the project is based entirely on the code of Biswa96's WslReverse repository and is accordingly licensed under the GPL v3. If the full SDK code is released later, the license may change.
 
 This program uses Tencent's rapidjson library to produce JSON output.
 
