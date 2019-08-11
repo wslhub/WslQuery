@@ -23,7 +23,7 @@ The usage of the program is simple.
 This project built with below version of Visual C++ and Windows 10 SDK.
 
 - Visual Studio 2019 16.3.0 Preview 1.0
-- Windows SDK 10.0.18362.0
+- Windows SDK 10.0.16299.0
 - NuGet 4.9.3.5777
 
 ## Credits
