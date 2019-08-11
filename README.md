@@ -30,4 +30,7 @@ GNU GPL v3 (https://github.com/Biswa96/WslReverse/blob/master/LICENSE)
 
 Tencent rapidjson
 MIT license (https://github.com/Tencent/rapidjson/blob/master/license.txt)
+
+Gears Icon
+icons8.com (https://icons8.com/icons/set/gears)
 ```
