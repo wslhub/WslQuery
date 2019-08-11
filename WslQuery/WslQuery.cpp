@@ -124,6 +124,7 @@ int main()
 
 			ADD_BOOL_MEMBER(distro, doc, "succeed", true);
 			ADD_STRING_MEMBER(distro, doc, "basePath", std::string(_bstr_t(BasePath)).data());
+			ADD_STRING_MEMBER(distro, doc, "distroName", std::string(_bstr_t(DistributionName)).data());
 			ADD_STRING_MEMBER(distro, doc, "kernelCommandLine", std::string(_bstr_t(KernelCommandLine)).data());
 
 			Value ae(kArrayType);
