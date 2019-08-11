@@ -132,21 +132,21 @@ int main()
 					Value().SetString(DefaultEnvironment[uleCount], doc.GetAllocator()).Move(),
 					doc.GetAllocator());
 			}
-			ADD_VALUE_MEMBER(distro, doc, "defaultEnvironment", ae);
+			ADD_VALUE_MEMBER(distro, doc, "defaultEnvironmentVariables", ae);
 			ADD_UINT_MEMBER(distro, doc, "defaultUid", DefaultUid);
 
 			ADD_BOOL_MEMBER(distro, doc, "enableInterop",
 				Flags& WSL_DISTRIBUTION_FLAGS::WSL_DISTRIBUTION_FLAGS_ENABLE_INTEROP);
-			ADD_BOOL_MEMBER(distro, doc, "enableDriveMouting",
+			ADD_BOOL_MEMBER(distro, doc, "enableDriveMounting",
 				Flags& WSL_DISTRIBUTION_FLAGS::WSL_DISTRIBUTION_FLAGS_ENABLE_DRIVE_MOUNTING);
 			ADD_BOOL_MEMBER(distro, doc, "appendNtPath",
 				Flags& WSL_DISTRIBUTION_FLAGS::WSL_DISTRIBUTION_FLAGS_APPEND_NT_PATH);
 			ADD_BOOL_MEMBER(distro, doc, "hasDefaultFlag",
 				Flags& WSL_DISTRIBUTION_FLAGS::WSL_DISTRIBUTION_FLAGS_DEFAULT);
-			ADD_UINT_MEMBER(distro, doc, "flags", Flags);
+			ADD_UINT_MEMBER(distro, doc, "distroFlags", Flags);
 
 			ADD_STRING_MEMBER(distro, doc, "distroId", guidString.data());
-			ADD_BOOL_MEMBER(distro, doc, "default", DistroInfo->Default);
+			ADD_BOOL_MEMBER(distro, doc, "isDefaultDistro", DistroInfo->Default);
 
 			std::string state;
 			switch (DistroInfo->State) {
@@ -169,8 +169,8 @@ int main()
 				state = "Unknown";
 				break;
 			}
-			ADD_STRING_MEMBER(distro, doc, "state", state.data());
-			ADD_UINT_MEMBER(distro, doc, "version", DistroInfo->Version);
+			ADD_STRING_MEMBER(distro, doc, "distroStatus", state.data());
+			ADD_UINT_MEMBER(distro, doc, "wslVersion", DistroInfo->Version);
 			
 			distroList.PushBack(distro, doc.GetAllocator());
 			DistroInfo = (PLXSS_ENUMERATE_INFO)((PBYTE)DistroInfo + sizeof(*DistroInfo));
@@ -186,7 +186,7 @@ int main()
 	}
 
 	ADD_BOOL_MEMBER(doc, doc, "succeed", true);
-	ADD_VALUE_MEMBER(doc, doc, "distroList", distroList);
+	ADD_VALUE_MEMBER(doc, doc, "distros", distroList);
 
 endOfApp:
 	if (tDistroInfo) {
