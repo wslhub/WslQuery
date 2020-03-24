@@ -36,13 +36,13 @@ using rapidjson::kArrayType;
 
 int main()
 {
-	HRESULT hr;
+	HRESULT hr = S_OK;
 	ILxssUserSession* wslSession = NULL;
 
 	Document doc;
 	doc.SetObject();
 
-	ULONG DistroCount;
+	ULONG DistroCount = 0;
 	PLXSS_ENUMERATE_INFO DistroInfo = NULL, tDistroInfo = NULL;
 	BOOL failFound = FALSE;
 	Value distroList(kArrayType);
@@ -84,16 +84,15 @@ int main()
 	hr = wslSession->lpVtbl->EnumerateDistributions(wslSession, &DistroCount, &DistroInfo);
 
 	if (DistroCount) {
-		PWSTR BasePath, DistributionName;
-		PSTR KernelCommandLine, * DefaultEnvironment;
-		ULONG Version, DefaultUid, EnvironmentCount;
-		WSL_DISTRIBUTION_FLAGS Flags;
-		GUID DistroId = { 0 };
-
 		tDistroInfo = DistroInfo;
-
 		for (ULONG i = 0u; i < DistroCount; i++) {
 			Value distro(rapidjson::kObjectType);
+			WSL_DISTRIBUTION_FLAGS Flags = WSL_DISTRIBUTION_FLAGS::WSL_DISTRIBUTION_FLAGS_NONE;
+			PWSTR BasePath = NULL, DistributionName = NULL;
+			PSTR KernelCommandLine = NULL, * DefaultEnvironment = NULL;
+			ULONG Version = 0, DefaultUid = 0, EnvironmentCount = 0;
+			GUID DistroId = { 0 };
+
 			hr = wslSession->lpVtbl->GetDistributionConfiguration(
 				wslSession, &DistroInfo->DistributionID, &DistributionName, &Version, &BasePath,
 				&KernelCommandLine, &DefaultUid, &EnvironmentCount, &DefaultEnvironment, (DWORD *)&Flags);
@@ -137,14 +136,14 @@ int main()
 			ADD_UINT_MEMBER(distro, doc, "defaultUid", DefaultUid);
 
 			ADD_BOOL_MEMBER(distro, doc, "enableInterop",
-				Flags& WSL_DISTRIBUTION_FLAGS::WSL_DISTRIBUTION_FLAGS_ENABLE_INTEROP);
+				(int)Flags& (int)WSL_DISTRIBUTION_FLAGS::WSL_DISTRIBUTION_FLAGS_ENABLE_INTEROP);
 			ADD_BOOL_MEMBER(distro, doc, "enableDriveMounting",
-				Flags& WSL_DISTRIBUTION_FLAGS::WSL_DISTRIBUTION_FLAGS_ENABLE_DRIVE_MOUNTING);
+				(int)Flags& (int)WSL_DISTRIBUTION_FLAGS::WSL_DISTRIBUTION_FLAGS_ENABLE_DRIVE_MOUNTING);
 			ADD_BOOL_MEMBER(distro, doc, "appendNtPath",
-				Flags& WSL_DISTRIBUTION_FLAGS::WSL_DISTRIBUTION_FLAGS_APPEND_NT_PATH);
+				(int)Flags& (int)WSL_DISTRIBUTION_FLAGS::WSL_DISTRIBUTION_FLAGS_APPEND_NT_PATH);
 			ADD_BOOL_MEMBER(distro, doc, "hasDefaultFlag",
-				Flags& WSL_DISTRIBUTION_FLAGS::WSL_DISTRIBUTION_FLAGS_DEFAULT);
-			ADD_UINT_MEMBER(distro, doc, "distroFlags", Flags);
+				(int)Flags& (int)WSL_DISTRIBUTION_FLAGS::WSL_DISTRIBUTION_FLAGS_DEFAULT);
+			ADD_UINT_MEMBER(distro, doc, "distroFlags", (int)Flags);
 
 			ADD_STRING_MEMBER(distro, doc, "distroId", guidString.data());
 			ADD_BOOL_MEMBER(distro, doc, "isDefaultDistro", DistroInfo->Default);
