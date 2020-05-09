@@ -1,5 +1,7 @@
 # WslQuery
 
+Notice: Currently, this repository does not maintain due to incompatibility issues between each Windows 10 release. This project depends on hidden API, which never released to the public.
+
 ![WslQuery Screenshot](Screenshot.png)
 
 [Download latest version](https://github.com/rkttu/WslQuery/releases/latest/download/WslQuery.exe)
