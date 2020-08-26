@@ -18,8 +18,6 @@ The usage of the program is simple.
 
 ## Build Environment
 
-This project built with below version of Visual C++ and Windows 10 SDK.
-
 - .NET Core SDK v3.1
 
 ## Credits
