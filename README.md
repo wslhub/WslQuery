@@ -1,7 +1,5 @@
 # WslQuery
 
-Notice: Recently, this application rebuilt with .NET Core SDK 3.1 and CoreRT native compiler. There is no more dependency with undocumented LXSS interface. Also, the license changed to MIT license.
-
 ![WslQuery Screenshot](Screenshot.png)
 
 [Download latest version](https://github.com/rkttu/WslQuery/releases/latest/download/WslQuery.exe)
@@ -18,7 +16,8 @@ The usage of the program is simple.
 
 ## Build Environment
 
-- .NET Core SDK v3.1
+- .NET 5
+- Native AOT Compiler
 
 ## Credits
 
