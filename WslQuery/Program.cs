@@ -1,13 +1,12 @@
-﻿using Microsoft.Win32;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
+using Wslhub.Sdk;
 
 namespace WslQuery
 {
@@ -16,7 +15,7 @@ namespace WslQuery
         private static void Main(string[] args)
         {
             var hasPretty = string.Equals("--pretty", args?.FirstOrDefault(), StringComparison.OrdinalIgnoreCase);
-            var queryResult = GetDistroQueryResult();
+            var queryResult = Wsl.GetDistroQueryResult();
 
             Console.Out.WriteLine(JsonConvert.SerializeObject(queryResult, new JsonSerializerSettings()
             {
@@ -25,129 +24,13 @@ namespace WslQuery
             }));
         }
 
-        private static DistroQueryResult GetDistroQueryResult()
-        {
-            var queryResult = new DistroQueryResult();
-
-            try
-            {
-                AssertSystemStatus();
-
-                foreach (var eachItem in GetWslDistroListFromRegistry())
-                {
-                    var distro = new DistroInfo()
-                    {
-                        DistroId = eachItem.DistroId,
-                        DistroName = eachItem.DistroName,
-                        BasePath = eachItem.BasePath,
-                    };
-                    distro.KernelCommandLine.AddRange(eachItem.KernelCommandLine);
-                    queryResult.Distros.Add(distro);
-
-                    distro.IsRegistered = NativeMethods.WslIsDistributionRegistered(eachItem.DistroName);
-
-                    if (distro.IsRegistered)
-                    {
-                        distro.HResult = NativeMethods.WslGetDistributionConfiguration(
-                            eachItem.DistroName,
-                            out int distroVersion,
-                            out int defaultUserId,
-                            out WslDistributionFlags flags,
-                            out IntPtr environmentVariables,
-                            out int environmentVariableCount);
-
-                        if (distro.Succeed)
-                        {
-                            distro.WslVersion = distroVersion;
-                            distro.DefaultUid = defaultUserId;
-                            distro.DistroFlags = flags;
-
-                            unsafe
-                            {
-                                byte*** lpEnvironmentVariables = (byte***)environmentVariables.ToPointer();
-                                for (int i = 0; i < environmentVariableCount; i++)
-                                {
-                                    byte** lpArray = lpEnvironmentVariables[i];
-                                    var content = Marshal.PtrToStringAnsi(new IntPtr(lpArray));
-                                    distro.DefaultEnvironmentVariables.Add(content);
-                                    Marshal.FreeCoTaskMem(new IntPtr(lpArray));
-                                }
-                                Marshal.FreeCoTaskMem(new IntPtr(lpEnvironmentVariables));
-                            }
-                        }
-                    }
-                }
-
-                var defaultDistroName = ExecuteAndGetResult(
-                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "wsl.exe"),
-                    "--list --quiet")
-                    .FirstOrDefault();
-
-                if (!string.IsNullOrWhiteSpace(defaultDistroName))
-                {
-                    var defaultDistro = queryResult.Distros
-                        .Where(x => string.Equals(x.DistroName, defaultDistroName, StringComparison.Ordinal))
-                        .FirstOrDefault();
-
-                    if (defaultDistro != null)
-                        defaultDistro.IsDefaultDistro = true;
-                }
-
-                queryResult.Succeed = true;
-            }
-            catch (Exception ex)
-            {
-                queryResult.Distros = null;
-                queryResult.Succeed = false;
-                queryResult.Error = ex.Message;
-            }
-
-            return queryResult;
-        }
-
-        private static IEnumerable<DistroRegistryInfo> GetWslDistroListFromRegistry()
-        {
-            var currentUser = Registry.CurrentUser;
-            var lxssPath = Path.Combine("SOFTWARE", "Microsoft", "Windows", "CurrentVersion", "Lxss");
-
-            using var lxssKey = currentUser.OpenSubKey(lxssPath, false);
-            var results = new List<DistroRegistryInfo>();
-
-            foreach (var keyName in lxssKey.GetSubKeyNames())
-            {
-                if (!Guid.TryParse(keyName, out Guid parsedGuid))
-                    continue;
-
-                using var distroKey = lxssKey.OpenSubKey(keyName);
-                var distroName = distroKey.GetValue("DistributionName", default(string)) as string;
-
-                if (string.IsNullOrWhiteSpace(distroName))
-                    continue;
-
-                var basePath = distroKey.GetValue("BasePath", default(string)) as string;
-                var normalizedPath = Path.GetFullPath(basePath);
-
-                var kernelCommandLine = (distroKey.GetValue("KernelCommandLine", default(string)) as string ?? string.Empty);
-                var result = new DistroRegistryInfo()
-                {
-                    DistroId = parsedGuid,
-                    DistroName = distroName,
-                    BasePath = basePath,
-                };
-                result.KernelCommandLine.AddRange(kernelCommandLine.Split(
-                    new char[] { ' ', '\t', },
-                    StringSplitOptions.RemoveEmptyEntries));
-                results.Add(result);
-            }
-
-            return results;
-        }
-
         private static IEnumerable<string> ExecuteAndGetResult(string executablePath, string commandLineArguments)
         {
             var processStartInfo = new ProcessStartInfo(executablePath, commandLineArguments)
             {
+#pragma warning disable CA1416 // Validate platform compatibility
                 LoadUserProfile = true,
+#pragma warning restore CA1416 // Validate platform compatibility
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 StandardOutputEncoding = Encoding.Unicode,
