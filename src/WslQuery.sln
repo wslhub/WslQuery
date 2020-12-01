@@ -7,14 +7,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WslQuery", "WslQuery\WslQue
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{D067CAE0-7642-459F-9E87-E6FACBEE261C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D067CAE0-7642-459F-9E87-E6FACBEE261C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D067CAE0-7642-459F-9E87-E6FACBEE261C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D067CAE0-7642-459F-9E87-E6FACBEE261C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D067CAE0-7642-459F-9E87-E6FACBEE261C}.Debug|x64.ActiveCfg = Debug|x64
+		{D067CAE0-7642-459F-9E87-E6FACBEE261C}.Debug|x64.Build.0 = Debug|x64
+		{D067CAE0-7642-459F-9E87-E6FACBEE261C}.Release|x64.ActiveCfg = Release|x64
+		{D067CAE0-7642-459F-9E87-E6FACBEE261C}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
