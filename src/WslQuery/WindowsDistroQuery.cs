@@ -25,8 +25,8 @@ internal static class WindowsDistroQuery
         Marshal.ThrowExceptionForHR(NativeMethods.CoInitializeEx(0, 0)); // COINIT_MULTITHREADED
         try
         {
-            // Preserve the WSL client impersonation and static-cloaking settings.
-            Marshal.ThrowExceptionForHR(NativeMethods.CoInitializeSecurity(0, -1, 0, 0, 0, 3, 0, 0x20, 0));
+            // Request WSL client impersonation and static cloaking if security is not already initialized.
+            ComSecurity.ThrowIfInitializationFailed(NativeMethods.CoInitializeSecurity(0, -1, 0, 0, 0, 3, 0, 0x20, 0));
             foreach (var distro in results)
                 PopulateConfiguration(distro);
         }

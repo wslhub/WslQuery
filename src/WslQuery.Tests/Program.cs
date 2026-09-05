@@ -16,12 +16,18 @@ var tests = new List<(string Name, Action Run)>
     ("Unregistered distribution does not report success", Unregistered),
     ("Native UTF-8 environment array", NativeStrings),
     ("Empty native array", () => Equal(0, NativeEnvironment.ReadAndFree(0, 0).Count)),
-    ("Invalid native array fails safely", InvalidNativeArray)
+    ("Invalid native array fails safely", InvalidNativeArray),
+    ("COM security initialization success", () => ComSecurity.ThrowIfInitializationFailed(0)),
+    ("Previously initialized COM security is accepted", () => ComSecurity.ThrowIfInitializationFailed(unchecked((int)0x80010119))),
+    ("Other COM security failures are preserved", ComSecurityFailures)
 };
 if (OperatingSystem.IsWindows())
+{
     tests.Add(("Registry enumeration with isolated Windows fixtures", RegistryEnumeration));
+    tests.Add(("Repeated native COM security initialization", RepeatedComSecurityInitialization));
+}
 else
-    Console.WriteLine("SKIP: Windows registry fixtures require Windows.");
+    Console.WriteLine("SKIP: Registry fixtures and native COM initialization require Windows.");
 
 var failed = 0;
 foreach (var (name, run) in tests)
@@ -156,6 +162,39 @@ static void InvalidNativeArray()
     try { NativeEnvironment.ReadAndFree(0, 1); }
     catch (InvalidDataException) { return; }
     throw new Exception("Expected InvalidDataException");
+}
+
+static void ComSecurityFailures()
+{
+    foreach (var result in new[] { unchecked((int)0x80004005), unchecked((int)0x80070005), unchecked((int)0x8001011A) })
+    {
+        try { ComSecurity.ThrowIfInitializationFailed(result); }
+        catch (Exception ex)
+        {
+            Equal(result, ex.HResult);
+            continue;
+        }
+        throw new Exception($"Expected initialization failure for HRESULT 0x{result:X8}.");
+    }
+}
+
+static void RepeatedComSecurityInitialization()
+{
+    if (!OperatingSystem.IsWindows())
+        throw new PlatformNotSupportedException();
+
+    Marshal.ThrowExceptionForHR(NativeMethods.CoInitializeEx(0, 0));
+    try
+    {
+        ComSecurity.ThrowIfInitializationFailed(NativeMethods.CoInitializeSecurity(0, -1, 0, 0, 0, 3, 0, 0x20, 0));
+        var repeated = NativeMethods.CoInitializeSecurity(0, -1, 0, 0, 0, 3, 0, 0x20, 0);
+        Equal(unchecked((int)0x80010119), repeated);
+        ComSecurity.ThrowIfInitializationFailed(repeated);
+    }
+    finally
+    {
+        NativeMethods.CoUninitialize();
+    }
 }
 
 static void RegistryEnumeration()
