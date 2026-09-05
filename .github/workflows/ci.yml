@@ -1,0 +1,43 @@
+name: Build and test
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: '10.0.x'
+      - run: dotnet restore src/WslQuery.sln -p:NuGetAuditMode=all -warnaserror
+      - run: dotnet build src/WslQuery.sln -c Release --no-restore -warnaserror
+      - run: dotnet run --project src/WslQuery.Tests -c Release --no-build
+      - name: Publish Windows Native AOT
+        if: runner.os == 'Windows'
+        run: dotnet publish src/WslQuery/WslQuery.csproj -c Release -r win-x64 -p:PublishAot=true -warnaserror -o artifacts/win-x64
+      - name: Smoke test the published executable
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./tests/SmokeTest.ps1 -Executable ./artifacts/win-x64/WslQuery.exe
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: runner.os == 'Windows'
+        with:
+          name: WslQuery-win-x64
+          path: artifacts/win-x64/
+          if-no-files-found: error

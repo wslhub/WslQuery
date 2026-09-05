@@ -20,8 +20,11 @@
             "args": [
                 "publish",
                 "${workspaceFolder}/WslQuery/WslQuery.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
+                "-c",
+                "Release",
+                "-r",
+                "win-x64",
+                "-p:PublishAot=true"
             ],
             "problemMatcher": "$msCompile"
         },
@@ -31,10 +34,9 @@
             "type": "process",
             "args": [
                 "watch",
-                "run",
+                "--project",
                 "${workspaceFolder}/WslQuery/WslQuery.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
+                "run"
             ],
             "problemMatcher": "$msCompile"
         }
