@@ -43,7 +43,7 @@ internal static class WindowsDistroQuery
         if (lxss is null)
             return results;
 
-        Guid.TryParse(lxss.GetValue("DefaultDistribution") as string, out var defaultId);
+        var hasDefault = Guid.TryParse(lxss.GetValue("DefaultDistribution") as string, out var defaultId);
         foreach (var keyName in lxss.GetSubKeyNames())
         {
             if (!Guid.TryParse(keyName, out var distroId))
@@ -60,7 +60,7 @@ internal static class WindowsDistroQuery
                 BasePath = key.GetValue("BasePath") as string,
                 KernelCommandLine = (key.GetValue("KernelCommandLine") as string ?? "")
                     .Split([' ', '\t'], StringSplitOptions.RemoveEmptyEntries).ToList(),
-                IsDefault = distroId == defaultId,
+                IsDefault = hasDefault && distroId == defaultId,
                 HResult = DistributionNotFound
             });
         }

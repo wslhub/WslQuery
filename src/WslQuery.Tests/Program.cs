@@ -189,6 +189,8 @@ static void RegistryEnumeration()
         Equal("quiet,debug", string.Join(",", results.Single(distro => distro.DistroId == firstId).KernelCommandLine));
         Equal<string?>(null, results.Single(distro => distro.DistroId == secondId).BasePath);
         Equal(true, results.All(distro => !distro.Succeed));
+        using (var emptyId = root.CreateSubKey(Guid.Empty.ToString("B")))
+            emptyId.SetValue("DistributionName", "EmptyGuidFixture");
         root.SetValue("DefaultDistribution", "malformed");
         Equal(0, WindowsDistroQuery.ReadRegistry(root).Count(distro => distro.IsDefault));
     }
